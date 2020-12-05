@@ -1,5 +1,6 @@
 package com.nelioalves.workshopmongo.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -23,8 +24,16 @@ public interface PostRepository extends MongoRepository<Post, String> {
 	// 'title' -> Nome do campo que vai ser pesquisado
 	// ?0 qual informacao recebe 1,2,3 .. no caso 0-text
 	// 'i'-> inginora maiusculas e minusculas
-	@Query("{ 'title' : { $regex: ?0, $options: 'i' }}")
+	@Query("{ 'title' : { $regex: ?0, $options: 'i' } }")
 	List<Post> searchTitle(String text);
 
+	// Forma 3 pesquisa um texto dentro de todos os campos (titulo, çosts e comentarios entre duas data
+	// Busca (text dentro de title OR post OR comment) AND date >= minDate and date <= maxDate
+	@Query("{ $and: [ {date: {$gte: ?1} }, {date: {$lte: ?2} }, { $or: ["
+			+ " { 'title' : { $regex: ?0, $options: 'i' } },"
+			+ " { 'body' : { $regex: ?0, $options: 'i' } },"
+			+ " { 'comments.text' : { $regex: ?0, $options: 'i' } } ] } ] }")
+	List<Post> fullSearch(String text, Date minDate, Date maxDate);
+	
 	
 }
